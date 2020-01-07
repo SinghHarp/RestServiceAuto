@@ -1,0 +1,183 @@
+	@DataProvider(name = "masterDataProvider")
+	private Object[][] getData(Method method) {
+		Object[][] data = null;
+		Map<String, String> dataMap = new HashMap<String, String>();
+
+		if (testDataMap == null) {
+			String xlsPath = "src/test/resources/" + this.getClass().getSimpleName() + ".xlsx";
+			testDataMap = new ExcelUtils().cacheAllExcelData(xlsPath);
+			System.out.println("Loading data from " + xlsPath);
+		}
+		dataMap = testDataMap.get(method.getName());
+		String wprInputSql = dataMap.get("WPR_SQL_INPUT");
+		if (wprInputSql != null && !wprInputSql.isEmpty()) {
+			dataMap.putAll(new DBUtils().getOneRowResultSetAsMap("wpr", wprInputSql));
+		}
+
+		data = new Object[][] { { dataMap } };
+
+		return data;
+		System.out.println("--------Printing the map------");
+			Set  s1 = dataMap.entrySet();
+			Iterator itr =s1.iterator();
+			while(itr.hasNext()){
+					Map.Entry m1 =(Map.Entry)itr.next();{
+					System.out.println(" key is ==> "+m1.getKey()+"--------"+"value is ==> "+m1.getValue());
+				}
+			}
+	}
+	
+	
+	
+select c.login                                as "userName", 
+       'Blue$hield1'                          as "password",
+       c.first_name                           as "firstName",
+       c.last_name                            as "lastName",
+       b.email                                as "emailAddress",
+       case producer_role
+            when 'PR' then 'Producer'
+            else 'General Agency'
+       end                                    as "producerType",
+       '415'                                  as "phoneNum1",
+       '555'                                  as "phoneNum2",
+       '1234'                                 as "phoneNum3",
+       'Individual ' || chr(38) || ' Family'  as "planType",
+       'email'                                as "contactmethod",
+       c.lastactivity_date
+from   producer_user a,
+       bsc_user b,
+       dps_user c
+where  a.producer_status = '1'
+and    b.user_id = a.user_id
+and    b.account_disabled_status_id = '0' -- active accts
+and    c.id = b.user_id
+and    c.lastactivity_date is not null
+and    (c.fail_login_cnt is null or c.fail_login_cnt = 0)
+order by c.lastactivity_date desc
+-----------------------------------------------------------------------
+
+ENVNAME=releasetest; ENVNAME_WEB=webh71
+WPR_PORT=12521;
+WPR_USER=SVCQATESTAUTO
+WPR_PASSWORD=Alfa_Un1f0rm_Tang0_0scar;
+WPR_SERVER=10.34.71.148;WPR_DB=WPRH23;
+----------------------------------------------------------------------
+
+Search for Internal Users
+
+select b.login         as "userName",
+       'Blue$hield1'   as "password",
+       f.userName1     as "userName1",
+       f.firstName     as "firstName",
+       f.lastName      as "lastName",
+       f.emailAddress  as "emailAddress",
+       b.lastactivity_date
+from   internal_user a,
+       dps_user b,
+       bsc_user c,
+       business_unit d,
+       job_title e,
+       (select substr(a2.login, 1, 3) as userName1,
+               a2.first_name          as firstName,
+               a2.last_name           as lastName,
+               c2.email               as emailAddress
+       from    dps_user a2,
+               internal_user b2,
+               bsc_user c2
+       where   b2.user_id = a2.id
+       and     c2.user_id = a2.id) f
+where  b.id = a.user_id
+and    c.user_id = b.id
+and    c.account_disabled_status_id = '0'
+and    b.lastactivity_date is not null
+and    (b.fail_login_cnt is null or b.fail_login_cnt = 0)
+and    a.business_unit_id = '06'
+and    a.job_title_id in ( 24, 25 )
+and    d.business_unit_id = a.business_unit_id
+and    e.business_unit_id = d.business_unit_id
+and    e.job_title_id = a.job_title_id
+and    e.name = 'Super administrator'
+order by b.lastactivity_date desc
+
+
+Search for Other Admins
+
+select b.login         as "userName",
+       'Blue$hield1'   as "password",
+       f.userName1     as "userName1",
+       f.firstName     as "firstName",
+       f.lastName      as "lastName",
+       f.emailAddress  as "emailAddress",
+       b.lastactivity_date
+from   internal_user a,
+       dps_user b,
+       bsc_user c,
+       business_unit d,
+       job_title e,
+       (select substr(a2.login, 1, 3) as userName1,
+               a2.first_name          as firstName,
+               a2.last_name           as lastName,
+               c2.email               as emailAddress
+       from    dps_user a2,
+               internal_user b2,
+               bsc_user c2
+       where   b2.user_id = a2.id
+       and     c2.user_id = a2.id
+       and     b2.business_unit_id = '06'
+       and     b2.job_title_id in ( 24, 25) ) f
+where  b.id = a.user_id
+and    c.user_id = b.id
+and    c.account_disabled_status_id = '0'
+and    b.lastactivity_date is not null
+and    (b.fail_login_cnt is null or b.fail_login_cnt = 0)Search for 
+and    a.business_unit_id = '06'
+and    a.job_title_id in ( 24, 25 )
+and    d.business_unit_id = a.business_unit_id
+and    e.business_unit_id = d.business_unit_id
+and    e.job_title_id = a.job_title_id
+and    e.name = 'Super administrator'
+order by b.lastactivity_date desc
+
+
+Search for Producers
+
+select b.login         as "userName",
+       'Blue$hield1'   as "password",
+       f.userName1     as "userName1",
+       f.firstName     as "firstName",
+       f.lastName      as "lastName",
+       f.emailAddress  as "emailAddress",
+       b.lastactivity_date
+from   internal_user a,
+       dps_user b,
+       bsc_user c,
+       business_unit d,
+       job_title e,
+       (select substr(a2.login, 1, 3) as userName1,
+               a2.first_name          as firstName,
+               a2.last_name           as lastName,
+               c2.email               as emailAddress
+       from    dps_user a2,
+               producer_user b2,
+               bsc_user c2
+       where   b2.user_id = a2.id
+       and     c2.user_id = a2.id) f
+where  b.id = a.user_id
+and    c.user_id = b.id
+and    c.account_disabled_status_id = '0'
+and    b.lastactivity_date is not null
+and    (b.fail_login_cnt is null or b.fail_login_cnt = 0)
+and    a.business_unit_id = '06'
+and    a.job_title_id in ( 24, 25 )
+and    d.business_unit_id = a.business_unit_id
+and    e.business_unit_id = d.business_unit_id
+and    e.job_title_id = a.job_title_id
+and    e.name = 'Super administrator'
+order by b.lastactivity_date desc                                                                         
+
+
+
+
+
+
+
